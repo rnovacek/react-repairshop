@@ -1,0 +1,35 @@
+{
+  "name": "repairshop-server",
+  "version": "0.0.1",
+  "description": "Repairshop app",
+  "main": "index.js",
+  "author": "Radek Novacek <radek.novacek@toptal.com>",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "node server/index.js",
+    "start:dev": "nodemon server/index.js",
+    "start:client": "cd client && npm start",
+    "start:all": "multitail -s 2 -cT ANSI -l 'npm run start:dev' -cT ANSI -l 'npm run start:client'",
+    "build": "cd client; react-scripts build",
+    "sequelize": "source ./.env && sequelize --models-path server/models --seeders-path server/seeders --migrations-path server/migrations --config server/config/config.json",
+    "lint": "eslint server client/src"
+  },
+  "dependencies": {
+    "apollo-server-express": "^1.1.2",
+    "body-parser": "^1.18.1",
+    "dotenv": "^4.0.0",
+    "express": "^4.15.4",
+    "graphql": "^0.11.3",
+    "graphql-tools": "^1.2.2",
+    "mongodb": "^2.2.31"
+  },
+  "devDependencies": {
+    "eslint": "^4.7.0",
+    "eslint-config": "^0.3.0",
+    "eslint-config-airbnb": "^15.1.0",
+    "eslint-config-airbnb-base": "^12.0.0",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-react": "^7.3.0"
+  }
+}
