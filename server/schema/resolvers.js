@@ -2,13 +2,33 @@
 const { ObjectId } = require('mongodb');
 const { GraphQLScalarType } = require('graphql');
 const { Kind } = require('graphql/language');
+const authentication = require('../authentication');
+
+const checkUser = (user, res) => {
+    if (!user) {
+        res.statusCode = 401;
+        throw new Error('error-not-authenticated');
+    }
+};
+
+const checkAdmin = (user, res) => {
+    checkUser(user, res);
+    if (!user.isAdmin) {
+        res.statusCode = 403;
+        throw new Error('error-not-admin');
+    }
+};
+
 module.exports = {
     Query: {
-        allRepairs: async (root, data, { mongo: { Repairs } }) => {
-            return Repairs.find({}).toArray();
+        allRepairs: async (root, data, ctx) => {
+            checkUser(ctx.user, ctx.res);
+            return ctx.mongo.Repairs.find({}).toArray();
         },
-        allUsers: async (root, data, { mongo: { Users } }) => {
-            return Users.find({}).toArray();
+        allUsers: async (root, data, ctx) => {
+            checkAdmin(ctx.user, ctx.res);
+            return ctx.mongo.Users.find({}).toArray();
+        },
         me: async (root, data, ctx) => {
             return ctx.user;
         },
@@ -16,6 +36,8 @@ module.exports = {
 
     Mutation: {
         createRepair: async (root, { input }, ctx) => {
+            checkAdmin(ctx.user, ctx.res);
+
             const response = await ctx.mongo.Repairs.insertOne(input);
             const oid = response.insertedIds[0];
             return {
@@ -23,6 +45,7 @@ module.exports = {
             };
         },
         updateRepair: async (root, { input }, ctx) => {
+            checkAdmin(ctx.user, ctx.res);
 
             const { id, ...data } = input;
             const oid = new ObjectId(id);
@@ -35,6 +58,7 @@ module.exports = {
             };
         },
         completeRepair: async (root, { input }, ctx) => {
+            checkUser(ctx.user, ctx.res);
 
             const { id, completedBy, ...data } = input;
             const oid = new ObjectId(id);
@@ -52,6 +76,7 @@ module.exports = {
             };
         },
         createUser: async (root, { input }, ctx) => {
+            checkAdmin(ctx.user, ctx.res);
 
             const { password, ...data } = input;
             const encryptedPassword = await authentication.encrypt(password);
@@ -65,6 +90,41 @@ module.exports = {
                     ...input,
                     id: response.insertedIds[0],
                 },
+            };
+        },
+        login: async (root, { input }, ctx) => {
+            const user = await ctx.mongo.Users.findOne({ username: input.username });
+            if (user) {
+                const token = await authentication.login(user, input.password);
+                if (token) {
+                    return {
+                        token,
+                        user,
+                    };
+                }
+            }
+            return {
+                token: null,
+                user: null,
+            };
+        },
+        register: async (root, { input }, ctx) => {
+            const user = await ctx.mongo.Users.findOne({ username: input.username });
+            if (user) {
+                throw new Error('User already exists');
+            }
+            const { password, ...data } = input;
+            const encryptedPassword = await authentication.encrypt(password);
+            await ctx.mongo.Users.insertOne({
+                ...data,
+                isAdmin: false,
+                encryptedPassword,
+            });
+            const newUser = await ctx.mongo.Users.findOne({ username: input.username });
+            const token = await authentication.login(newUser, password);
+            return {
+                token,
+                newUser,
             };
         },
     },
