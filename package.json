@@ -16,20 +16,23 @@
   },
   "dependencies": {
     "apollo-server-express": "^1.1.2",
+    "bcrypt": "^1.0.3",
     "body-parser": "^1.18.1",
     "dotenv": "^4.0.0",
+    "eslint-plugin-jsx-a11y": "5.1.1",
     "express": "^4.15.4",
     "graphql": "^0.11.3",
     "graphql-tools": "^1.2.2",
+    "jsonwebtoken": "^8.0.1",
     "mongodb": "^2.2.31"
   },
   "devDependencies": {
+    "babel-eslint": "^8.0.0",
     "eslint": "^4.7.0",
     "eslint-config": "^0.3.0",
     "eslint-config-airbnb": "^15.1.0",
     "eslint-config-airbnb-base": "^12.0.0",
     "eslint-plugin-import": "^2.7.0",
-    "eslint-plugin-jsx-a11y": "^6.0.2",
     "eslint-plugin-react": "^7.3.0"
   }
 }
