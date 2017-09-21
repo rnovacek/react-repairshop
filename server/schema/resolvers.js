@@ -79,19 +79,60 @@ module.exports = {
             checkAdmin(ctx.user, ctx.res);
 
             const { password, ...data } = input;
+
+            if (!data.username) {
+                throw new Error('Username must be filled');
+            }
+
+            if (!password) {
+                throw new Error('Password must be filled');
+            }
+
+            const user = await ctx.mongo.Users.findOne({ username: data.username });
+            if (user) {
+                throw new Error(`User with username "${data.username}" already exists`);
+            }
+
             const encryptedPassword = await authentication.encrypt(password);
-            const response = await ctx.mongo.Users.insertOne({
+            await ctx.mongo.Users.insertOne({
                 ...data,
-                isAdmin: data.isAdmin || false,
                 encryptedPassword,
             });
             return {
-                user: {
-                    ...input,
-                    id: response.insertedIds[0],
-                },
+                user: await ctx.mongo.Users.findOne({ username: data.username }),
             };
         },
+        updateUser: async (root, { input }, ctx) => {
+            checkAdmin(ctx.user, ctx.res);
+
+            const { id, password, ...data } = input;
+            if (password) {
+                data.encryptedPassword = await authentication.encrypt(password);
+            }
+            const oid = new ObjectId(id);
+            console.log('Data', data, oid);
+            await ctx.mongo.Users.updateOne(
+                { _id: oid },
+                { $set: data },
+            );
+            return {
+                user: await ctx.mongo.Users.findOne({ _id: oid }),
+            };
+        },
+        deleteUser: async (root, { input }, ctx) => {
+            checkAdmin(ctx.user, ctx.res);
+
+            const { id } = input;
+            const oid = new ObjectId(id);
+            const response = await ctx.mongo.Users.deleteOne({ _id: oid });
+            if (response.deletedCount === 0) {
+                throw new Error('No such user');
+            }
+            return {
+                id,
+            };
+        },
+
         login: async (root, { input }, ctx) => {
             const user = await ctx.mongo.Users.findOne({ username: input.username });
             if (user) {

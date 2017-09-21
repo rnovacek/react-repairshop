@@ -88,7 +88,7 @@ const typeDefs = `
     }
 
     input ApproveRepairInput {
-        id: ID!
+        id: String!
     }
 
     type ApproveRepairPayload {
@@ -96,11 +96,11 @@ const typeDefs = `
     }
 
     input DeleteRepairInput {
-        id: ID!
+        id: String!
     }
 
     type DeleteRepairPayload {
-        id: ID
+        id: String!
     }
 
 
@@ -116,6 +116,7 @@ const typeDefs = `
     }
 
     input UpdateUserInput {
+        id: String!
         name: String
         username: String
         password: String
@@ -127,11 +128,11 @@ const typeDefs = `
     }
 
     input DeleteUserInput {
-        id: ID!
+        id: String!
     }
 
     type DeleteUserPayload {
-        id: ID
+        id: String
     }
 
 
