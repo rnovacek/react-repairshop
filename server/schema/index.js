@@ -20,7 +20,7 @@ const typeDefs = `
         id: ID!
         name: String!
         username: String!
-        isManager: Boolean!
+        isAdmin: Boolean!
     }
 
     type Comment {
@@ -34,7 +34,7 @@ const typeDefs = `
     type Query {
         allRepairs: [Repair!]!
         allUsers: [User!]!
-        me: User!
+        me: User
     }
 
     type Mutation {

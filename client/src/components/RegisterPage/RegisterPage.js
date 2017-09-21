@@ -32,10 +32,7 @@ class RegisterPage extends React.Component {
                 error: 'Registration failed',
             });
         } else {
-            localStorage.token = response.data.register.token;
-            const params = new URLSearchParams(this.props.location.search);
-            const next = params.get('next') || '/';
-            this.props.history.push(next);
+            this.props.onLogin(response.data.register.token);
         }
     };
 
@@ -80,6 +77,7 @@ RegisterPage.propTypes = {
     history: PropTypes.shape({
         push: PropTypes.func.isRequired,
     }).isRequired,
+    onLogin: PropTypes.func.isRequired,
 };
 
 const REGISTER_MUTATION = gql`

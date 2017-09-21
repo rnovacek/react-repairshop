@@ -30,10 +30,7 @@ class LoginPage extends React.Component {
                 error: 'Invalid username or password',
             });
         } else {
-            localStorage.token = response.data.login.token;
-            const params = new URLSearchParams(this.props.location.search);
-            const next = params.get('next') || '/';
-            this.props.history.push(next);
+            this.props.onLogin(response.data.login.token);
         }
     };
 
@@ -80,6 +77,7 @@ LoginPage.propTypes = {
     history: PropTypes.shape({
         push: PropTypes.func.isRequired,
     }).isRequired,
+    onLogin: PropTypes.func.isRequired,
 };
 
 const LOGIN_MUTATION = gql`
