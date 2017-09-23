@@ -4,15 +4,18 @@ const resolvers = require('./resolvers');
 const typeDefs = `
     scalar DateTime
 
+    enum Status {
+        PENDING
+        COMPLETED
+        APPROVED
+    }
+
     type Repair {
         id: ID!
         title: String!
+        status: Status!
         scheduledTo: DateTime!
         assignedTo: User
-        completedAt: DateTime
-        completedBy: User
-        approvedAt: DateTime
-        approvedBy: User
         comments: [Comment!]!
     }
 
@@ -53,13 +56,14 @@ const typeDefs = `
     }
 
     input UserInput {
-        id: ID!
+        id: ID
     }
 
     input CreateRepairInput {
-        title: String!,
+        title: String!
+        status: Status!
         scheduledTo: DateTime!
-        assignedTo: UserInput
+        assignedTo: UserInput!
     }
 
     type CreateRepairPayload {
@@ -68,9 +72,10 @@ const typeDefs = `
 
     input UpdateRepairInput {
         id: ID!
-        title: String
+        title: String!
+        status: Status!
         scheduledTo: DateTime!
-        assignedTo: UserInput
+        assignedTo: UserInput!
     }
 
     type UpdateRepairPayload {
@@ -79,8 +84,6 @@ const typeDefs = `
 
     input CompleteRepairInput {
         id: ID!
-        completedBy: UserInput
-        isApproved: Boolean
     }
 
     type CompleteRepairPayload {
@@ -88,7 +91,7 @@ const typeDefs = `
     }
 
     input ApproveRepairInput {
-        id: String!
+        id: ID!
     }
 
     type ApproveRepairPayload {

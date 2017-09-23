@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 const UsersList = ({ users }) => {
     return (
         <div>
-            <Menu secondary>
+            <Menu>
                 <Menu.Item>
                     <Input placeholder="Name" />
                 </Menu.Item>

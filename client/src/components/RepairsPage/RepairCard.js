@@ -2,12 +2,63 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Card } from 'semantic-ui-react';
 import parse from 'date-fns/parse';
+import { Link } from 'react-router-dom';
 
-const RepairCard = ({ repair }) => {
+import RepairStatusIcon from './RepairStatusIcon';
+
+const RepairCardStatus = ({ repair, me, onComplete, onApprove }) => {
+    if (repair.status === 'PENDING') {
+        if (repair.assignedTo === me.id || me.isAdmin) {
+            return (
+                <Button
+                    basic
+                    onClick={(e) => {
+                        onComplete(repair.id);
+                        e.preventDefault();
+                    }}
+                >
+                    Mark as complete
+                </Button>
+            );
+        }
+        return <span>Pending</span>;
+    } else if (repair.status === 'COMPLETED') {
+        if (me.isAdmin) {
+            return (
+                <Button
+                    basic
+                    onClick={(e) => {
+                        onApprove(repair.id);
+                        e.preventDefault();
+                    }}
+                >
+                    Approve
+                </Button>
+            );
+        }
+        return <span>Completed</span>;
+    }
+    return <span>Approved</span>;
+};
+
+RepairCardStatus.propTypes = {
+    repair: PropTypes.shape({
+        status: PropTypes.string.isRequired,
+    }).isRequired,
+    me: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        isAdmin: PropTypes.bool.isRequired,
+    }).isRequired,
+    onComplete: PropTypes.func.isRequired,
+    onApprove: PropTypes.func.isRequired,
+};
+
+const RepairCard = ({ repair, me, onComplete, onApprove }) => {
     return (
-        <Card>
+        <Card as={Link} to={`/repairs/${repair.id}`}>
             <Card.Content>
                 <Card.Header>
+                    <RepairStatusIcon repair={repair} />
                     {repair.title}
                 </Card.Header>
                 <Card.Meta>
@@ -18,7 +69,12 @@ const RepairCard = ({ repair }) => {
                 </Card.Description>
             </Card.Content>
             <Card.Content extra>
-                <Button basic>Mark as complete</Button>
+                <RepairCardStatus
+                    repair={repair}
+                    me={me}
+                    onComplete={onComplete}
+                    onApprove={onApprove}
+                />
             </Card.Content>
         </Card>
     );
@@ -28,9 +84,22 @@ RepairCard.propTypes = {
     repair: PropTypes.shape({
         id: PropTypes.string.isRequired,
         title: PropTypes.string.isRequired,
-        scheduledTo: PropTypes.string.isRequired,
-        assignedTo: PropTypes.string,
+        scheduledTo: PropTypes.instanceOf(Date).isRequired,
+        assignedTo: PropTypes.shape({
+            name: PropTypes.string.isRequired,
+        }),
+        completedAt: PropTypes.instanceOf(Date),
+        completedBy: PropTypes.shape({
+            name: PropTypes.string.isRequired,
+        }),
+        approvedAt: PropTypes.instanceOf(Date),
+        approvedBy: PropTypes.shape({
+            name: PropTypes.string.isRequired,
+        }),
     }).isRequired,
+    me: PropTypes.object.isRequired,
+    onComplete: PropTypes.func.isRequired,
+    onApprove: PropTypes.func.isRequired,
 };
 
 export default RepairCard;

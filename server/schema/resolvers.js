@@ -38,14 +38,30 @@ module.exports = {
         createRepair: async (root, { input }, ctx) => {
             checkAdmin(ctx.user, ctx.res);
 
+            if (!input.title) {
+                throw new Error('Title must be filled');
+            }
+
+            if (!input.scheduledTo) {
+                throw new Error('Repair needs to be scheduled');
+            }
+
             const response = await ctx.mongo.Repairs.insertOne(input);
-            const oid = response.insertedIds[0];
+            const oid = response.insertedId;
             return {
-                repair: ctx.mongo.Repairs.findOne({ _id: oid }),
+                repair: await ctx.mongo.Repairs.findOne({ _id: oid }),
             };
         },
         updateRepair: async (root, { input }, ctx) => {
             checkAdmin(ctx.user, ctx.res);
+
+            if (!input.title) {
+                throw new Error('Title must be filled');
+            }
+
+            if (!input.scheduledTo) {
+                throw new Error('Repair needs to be scheduled');
+            }
 
             const { id, ...data } = input;
             const oid = new ObjectId(id);
@@ -54,20 +70,40 @@ module.exports = {
                 { $set: data },
             );
             return {
-                repair: ctx.mongo.Repairs.findOne({ _id: oid }),
+                repair: await ctx.mongo.Repairs.findOne({ _id: oid }),
             };
         },
         completeRepair: async (root, { input }, ctx) => {
             checkUser(ctx.user, ctx.res);
 
-            const { id, completedBy, ...data } = input;
-            const oid = new ObjectId(id);
+            const oid = new ObjectId(input.id);
+            const repair = await ctx.mongo.Repairs.findOne({ _id: oid });
+            if (ctx.user.id !== repair.assignedTo && !ctx.user.isAdmin) {
+                throw new Error('Repair must be assigned to you to mark it as completed');
+            }
+
             await ctx.mongo.Repairs.updateOne(
                 { _id: oid },
                 {
                     $set: {
-                        ...data,
-                        completedBy: new ObjectId(completedBy.id),
+                        status: 'COMPLETED',
+                    },
+                },
+            );
+            return {
+                repair: ctx.mongo.Repairs.findOne({ _id: oid }),
+            };
+        },
+        approveRepair: async (root, { input }, ctx) => {
+            checkAdmin(ctx.user, ctx.res);
+
+            const oid = new ObjectId(input.id);
+
+            await ctx.mongo.Repairs.updateOne(
+                { _id: oid },
+                {
+                    $set: {
+                        status: 'APPROVED',
                     },
                 },
             );
@@ -110,7 +146,6 @@ module.exports = {
                 data.encryptedPassword = await authentication.encrypt(password);
             }
             const oid = new ObjectId(id);
-            console.log('Data', data, oid);
             await ctx.mongo.Users.updateOne(
                 { _id: oid },
                 { $set: data },
@@ -172,6 +207,9 @@ module.exports = {
 
     Repair: {
         id: root => root._id || root.id,
+        assignedTo: async ({ _id }, data, ctx) => {
+            return ctx.mongo.Users.findOne({ _id });
+        },
     },
 
     User: {
