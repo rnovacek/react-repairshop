@@ -129,7 +129,7 @@ const RepairsPage = ({
                         () => (
                             <RepairForm
                                 repair={null}
-                                users={[]}
+                                users={allRepairsQuery.allUsers}
                                 onUpdate={onUpdate}
                                 onCancel={onCancel}
                             />
@@ -144,7 +144,7 @@ const RepairsPage = ({
                                 repair={
                                     allRepairsQuery.allRepairs.find(r => r.id === params.repairId)
                                 }
-                                users={[]}
+                                users={allRepairsQuery.allUsers}
                                 onUpdate={onUpdate}
                                 onDelete={onDelete}
                                 onCancel={onCancel}
@@ -152,21 +152,19 @@ const RepairsPage = ({
                         )
                     }
                 />
+                <Route
+                    render={
+                        () => (
+                            <RepairsList
+                                repairs={repairs}
+                                me={allRepairsQuery.me}
+                                onComplete={onComplete}
+                                onApprove={onApprove}
+                            />
+                        )
+                    }
+                />
             </Switch>
-            <Route
-                path="/repairs"
-                exact
-                render={
-                    () => (
-                        <RepairsList
-                            repairs={repairs}
-                            me={allRepairsQuery.me}
-                            onComplete={onComplete}
-                            onApprove={onApprove}
-                        />
-                    )
-                }
-            />
         </div>
     );
 };
@@ -199,6 +197,10 @@ const ALL_REPAIRS_QUERY = gql`
                 name
             }
         }
+        allUsers {
+            id
+            name
+        }
         me {
             id
             isAdmin
@@ -216,6 +218,7 @@ const CREATE_REPAIR_MUTATION = gql`
                 scheduledTo
                 assignedTo {
                     id
+                    name
                 }
             }
         }
@@ -232,6 +235,7 @@ const UPDATE_REPAIR_MUTATION = gql`
                 scheduledTo
                 assignedTo {
                     id
+                    name
                 }
             }
         }

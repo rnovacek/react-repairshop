@@ -26,7 +26,7 @@ module.exports = {
             return ctx.mongo.Repairs.find({}).toArray();
         },
         allUsers: async (root, data, ctx) => {
-            checkAdmin(ctx.user, ctx.res);
+            checkUser(ctx.user, ctx.res);
             return ctx.mongo.Users.find({}).toArray();
         },
         me: async (root, data, ctx) => {
@@ -63,11 +63,16 @@ module.exports = {
                 throw new Error('Repair needs to be scheduled');
             }
 
-            const { id, ...data } = input;
+            const { id, assignedTo, ...data } = input;
             const oid = new ObjectId(id);
             await ctx.mongo.Repairs.updateOne(
                 { _id: oid },
-                { $set: data },
+                {
+                    $set: {
+                        ...data,
+                        assignedTo: assignedTo ? ObjectId(assignedTo.id) : null,
+                    },
+                },
             );
             return {
                 repair: await ctx.mongo.Repairs.findOne({ _id: oid }),
@@ -207,8 +212,8 @@ module.exports = {
 
     Repair: {
         id: root => root._id || root.id,
-        assignedTo: async ({ _id }, data, ctx) => {
-            return ctx.mongo.Users.findOne({ _id });
+        assignedTo: async ({ assignedTo }, data, ctx) => {
+            return ctx.mongo.Users.findOne({ _id: assignedTo });
         },
     },
 

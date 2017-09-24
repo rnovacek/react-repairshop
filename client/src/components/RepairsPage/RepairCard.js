@@ -62,7 +62,7 @@ const RepairCard = ({ repair, me, onComplete, onApprove }) => {
                     {repair.title}
                 </Card.Header>
                 <Card.Meta>
-                    {repair.assignedTo ? repair.assignedTo.name : null}
+                    {repair.assignedTo ? repair.assignedTo.name : '---'}
                 </Card.Meta>
                 <Card.Description>
                     {parse(repair.scheduledTo).toLocaleString()}

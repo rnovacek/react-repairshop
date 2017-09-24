@@ -28,8 +28,8 @@ const App = ({ location, history, meQuery }) => {
         if (next === '/login') {
             next = '/';
         }
-        history.push(next);
         meQuery.refetch();
+        history.push(next);
     };
 
     if (meQuery.loading) {

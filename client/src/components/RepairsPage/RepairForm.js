@@ -18,14 +18,14 @@ class RepairForm extends React.Component {
                 title: props.repair.title,
                 status: props.repair.status,
                 scheduledTo: props.repair.scheduledTo,
-                assignedTo: props.repair.assignedTo,
+                assignedTo: props.repair.assignedTo ? props.repair.assignedTo.id : '-',
             };
         } else {
             this.state = {
                 ...state,
                 title: '',
                 scheduledTo: (new Date()).toISOString(),
-                assignedTo: null,
+                assignedTo: '-',
                 status: 'PENDING',
             };
         }
@@ -42,7 +42,7 @@ class RepairForm extends React.Component {
                 title: this.state.title,
                 status: this.state.status,
                 scheduledTo: this.state.scheduledTo,
-                assignedTo: this.state.assignedTo,
+                assignedTo: this.state.assignedTo !== '-' ? this.state.assignedTo : null,
             });
         } catch (e) {
             this.setState({
@@ -68,11 +68,18 @@ class RepairForm extends React.Component {
     };
 
     render() {
-        const assignedToOptions = this.props.users.map(user => ({
-            key: user.id,
-            value: user.id,
-            text: user.name,
-        }));
+        const assignedToOptions = [
+            {
+                key: '-',
+                value: '-',
+                text: '---',
+            },
+            ...this.props.users.map(user => ({
+                key: user.id,
+                value: user.id,
+                text: user.name,
+            })),
+        ];
 
         return (
             <Form>
@@ -106,6 +113,8 @@ class RepairForm extends React.Component {
                     search
                     selection
                     options={assignedToOptions}
+                    value={this.state.assignedTo}
+                    onChange={(e, data) => this.setState({ assignedTo: data.value })}
                 />
 
                 <Form.Field control={Step.Group} fluid size="tiny">
