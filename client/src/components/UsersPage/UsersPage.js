@@ -166,7 +166,7 @@ const CREATE_USER_MUTATION = gql`
 `;
 
 const UPDATE_USER_MUTATION = gql`
-    mutation UpdateUserMutation($id: String!, $name: String, $username: String, $password: String, $isAdmin: Boolean!) {
+    mutation UpdateUserMutation($id: ID!, $name: String, $username: String, $password: String, $isAdmin: Boolean!) {
         updateUser(input: { id: $id, name: $name, username: $username, password: $password, isAdmin: $isAdmin }) {
             user {
                 id
@@ -179,7 +179,7 @@ const UPDATE_USER_MUTATION = gql`
 `;
 
 const DELETE_USER_MUTATION = gql`
-    mutation DeleteUserMutation($id: String!) {
+    mutation DeleteUserMutation($id: ID!) {
         deleteUser(input: { id: $id }) {
             id
         }
