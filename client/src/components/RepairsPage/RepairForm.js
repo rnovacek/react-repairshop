@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, Dropdown, Form, Input, Message, Step } from 'semantic-ui-react';
+import { Button, Divider, Dropdown, Form, Input, Message, Step } from 'semantic-ui-react';
 
 class RepairForm extends React.Component {
     constructor(props) {
@@ -83,6 +83,10 @@ class RepairForm extends React.Component {
 
         return (
             <Form>
+                <Button content="Back" icon="left arrow" labelPosition="left" onClick={this.props.onCancel} />
+
+                <Divider hidden />
+
                 {
                     this.state.error ?
                         <Message negative>{this.state.error}</Message>
@@ -92,6 +96,7 @@ class RepairForm extends React.Component {
 
                 <Form.Field
                     control={Input}
+                    disabled={!this.props.onUpdate}
                     label="Title"
                     placeholder="Title"
                     value={this.state.title}
@@ -100,6 +105,7 @@ class RepairForm extends React.Component {
 
                 <Form.Field
                     control={Input}
+                    disabled={!this.props.onUpdate}
                     label="Scheduled to"
                     value={this.state.scheduledTo}
                     onChange={e => this.setState({ scheduledTo: e.target.value })}
@@ -107,6 +113,7 @@ class RepairForm extends React.Component {
 
                 <Form.Field
                     control={Dropdown}
+                    disabled={!this.props.onUpdate}
                     label="Assignee"
                     placeholder="Assignee"
                     fluid
@@ -117,7 +124,7 @@ class RepairForm extends React.Component {
                     onChange={(e, data) => this.setState({ assignedTo: data.value })}
                 />
 
-                <Form.Field control={Step.Group} fluid size="tiny">
+                <Form.Field control={Step.Group} fluid size="tiny" disabled={!this.props.onUpdate}>
                     <Step
                         icon="wait"
                         title="Pending"
@@ -140,18 +147,19 @@ class RepairForm extends React.Component {
                     />
                 </Form.Field>
 
-                <Button type="submit" onClick={this.onUpdate} loading={this.state.updating} primary>
-                    {
-                        this.props.repair ?
-                            'Update'
-                            :
-                            'Create'
-                    }
-                </Button>
-
-                <Button onClick={this.props.onCancel}>
-                    Cancel
-                </Button>
+                {
+                    this.props.onUpdate ?
+                        <Button type="submit" onClick={this.onUpdate} loading={this.state.updating} primary>
+                            {
+                                this.props.repair ?
+                                    'Update'
+                                    :
+                                    'Create'
+                            }
+                        </Button>
+                        :
+                        null
+                }
 
                 {
                     this.props.onDelete ?
@@ -170,10 +178,11 @@ RepairForm.propTypes = {
     repair: PropTypes.shape({
         id: PropTypes.string.isRequired,
         title: PropTypes.string.isRequired,
-        scheduledTo: PropTypes.instanceOf(Date).isRequired,
-        assignedTo: PropTypes.string,
-        completed: PropTypes.bool.isRequired,
-        approved: PropTypes.bool.isRequired,
+        scheduledTo: PropTypes.string.isRequired,
+        assignedTo: PropTypes.shape({
+            name: PropTypes.string.isRequired,
+        }),
+        status: PropTypes.string.isRequired,
     }),
     users: PropTypes.arrayOf(
         PropTypes.shape({
@@ -181,13 +190,14 @@ RepairForm.propTypes = {
             name: PropTypes.string.isRequired,
         }),
     ).isRequired,
-    onUpdate: PropTypes.func.isRequired,
+    onUpdate: PropTypes.func,
     onDelete: PropTypes.func,
     onCancel: PropTypes.func.isRequired,
 };
 
 RepairForm.defaultProps = {
     repair: null,
+    onUpdate: null,
     onDelete: null,
 };
 

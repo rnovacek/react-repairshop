@@ -5,5 +5,6 @@ module.exports = async () => {
     return {
         Repairs: db.collection('repairs'),
         Users: db.collection('users'),
+        Comments: db.collection('comments'),
     };
 };

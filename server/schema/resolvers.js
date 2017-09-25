@@ -83,7 +83,7 @@ module.exports = {
 
             const oid = new ObjectId(input.id);
             const repair = await ctx.mongo.Repairs.findOne({ _id: oid });
-            if (ctx.user.id !== repair.assignedTo && !ctx.user.isAdmin) {
+            if ((!repair.assignedTo || !ctx.user._id.equals(repair.assignedTo)) && !ctx.user.isAdmin) {
                 throw new Error('Repair must be assigned to you to mark it as completed');
             }
 
@@ -116,6 +116,35 @@ module.exports = {
                 repair: ctx.mongo.Repairs.findOne({ _id: oid }),
             };
         },
+        commentRepair: async (root, { input }, ctx) => {
+            checkUser(ctx.user, ctx.res);
+
+            const oid = new ObjectId(input.repair.id);
+            await ctx.mongo.Comments.insertOne({
+                body: input.body,
+                repair: oid,
+                author: ctx.user._id,
+                createdAt: new Date(),
+            });
+            return {
+                repair: ctx.mongo.Repairs.findOne({ _id: oid }),
+            };
+        },
+        deleteRepair: async (root, { input }, ctx) => {
+            checkAdmin(ctx.user, ctx.res);
+
+            const { id } = input;
+            const oid = new ObjectId(id);
+            const response = await ctx.mongo.Repairs.deleteOne({ _id: oid });
+            if (response.deletedCount === 0) {
+                throw new Error('No such repair');
+            }
+            await ctx.mongo.Comments.deleteMany({ repair: oid });
+            return {
+                id,
+            };
+        },
+
         createUser: async (root, { input }, ctx) => {
             checkAdmin(ctx.user, ctx.res);
 
@@ -215,10 +244,20 @@ module.exports = {
         assignedTo: async ({ assignedTo }, data, ctx) => {
             return ctx.mongo.Users.findOne({ _id: assignedTo });
         },
+        comments: async (repair, data, ctx) => {
+            return ctx.mongo.Comments.find({ repair: repair._id }).toArray();
+        },
     },
 
     User: {
         id: root => root._id || root.id,
+    },
+
+    Comment: {
+        id: root => root._id || root.id,
+        author: async ({ author }, data, ctx) => {
+            return ctx.mongo.Users.findOne({ _id: author });
+        },
     },
 
     DateTime: new GraphQLScalarType({

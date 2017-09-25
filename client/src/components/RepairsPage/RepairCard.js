@@ -8,7 +8,7 @@ import RepairStatusIcon from './RepairStatusIcon';
 
 const RepairCardStatus = ({ repair, me, onComplete, onApprove }) => {
     if (repair.status === 'PENDING') {
-        if (repair.assignedTo === me.id || me.isAdmin) {
+        if ((repair.assignedTo && repair.assignedTo.id === me.id) || me.isAdmin) {
             return (
                 <Button
                     basic
@@ -76,6 +76,9 @@ const RepairCard = ({ repair, me, onComplete, onApprove }) => {
                     onApprove={onApprove}
                 />
             </Card.Content>
+            <Card.Content extra>
+                {repair.comments.length} comments
+            </Card.Content>
         </Card>
     );
 };
@@ -84,20 +87,16 @@ RepairCard.propTypes = {
     repair: PropTypes.shape({
         id: PropTypes.string.isRequired,
         title: PropTypes.string.isRequired,
-        scheduledTo: PropTypes.instanceOf(Date).isRequired,
+        scheduledTo: PropTypes.string.isRequired,
         assignedTo: PropTypes.shape({
             name: PropTypes.string.isRequired,
         }),
-        completedAt: PropTypes.instanceOf(Date),
-        completedBy: PropTypes.shape({
-            name: PropTypes.string.isRequired,
-        }),
-        approvedAt: PropTypes.instanceOf(Date),
-        approvedBy: PropTypes.shape({
-            name: PropTypes.string.isRequired,
-        }),
+        status: PropTypes.string,
     }).isRequired,
-    me: PropTypes.object.isRequired,
+    me: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        isAdmin: PropTypes.bool.isRequired,
+    }).isRequired,
     onComplete: PropTypes.func.isRequired,
     onApprove: PropTypes.func.isRequired,
 };

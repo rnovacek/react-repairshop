@@ -45,6 +45,7 @@ const typeDefs = `
         updateRepair(input: UpdateRepairInput!): UpdateRepairPayload
         completeRepair(input: CompleteRepairInput!): CompleteRepairPayload
         approveRepair(input: ApproveRepairInput!): ApproveRepairPayload
+        commentRepair(input: CommentRepairInput!): CommentRepairPayload
         deleteRepair(input: DeleteRepairInput!): DeleteRepairPayload
 
         createUser(input: CreateUserInput!): CreateUserPayload
@@ -56,14 +57,18 @@ const typeDefs = `
     }
 
     input UserInput {
-        id: ID
+        id: ID!
+    }
+
+    input RepairInput {
+        id: ID!
     }
 
     input CreateRepairInput {
         title: String!
         status: Status!
         scheduledTo: DateTime!
-        assignedTo: UserInput!
+        assignedTo: UserInput
     }
 
     type CreateRepairPayload {
@@ -75,7 +80,7 @@ const typeDefs = `
         title: String!
         status: Status!
         scheduledTo: DateTime!
-        assignedTo: UserInput!
+        assignedTo: UserInput
     }
 
     type UpdateRepairPayload {
@@ -98,12 +103,21 @@ const typeDefs = `
         repair: Repair
     }
 
+    input CommentRepairInput {
+        repair: RepairInput!
+        body: String!
+    }
+
+    type CommentRepairPayload {
+        repair: Repair
+    }
+
     input DeleteRepairInput {
-        id: String!
+        id: ID!
     }
 
     type DeleteRepairPayload {
-        id: String!
+        id: ID
     }
 
 
@@ -119,7 +133,7 @@ const typeDefs = `
     }
 
     input UpdateUserInput {
-        id: String!
+        id: ID!
         name: String
         username: String
         password: String
@@ -131,11 +145,11 @@ const typeDefs = `
     }
 
     input DeleteUserInput {
-        id: String!
+        id: ID!
     }
 
     type DeleteUserPayload {
-        id: String
+        id: ID
     }
 
 
