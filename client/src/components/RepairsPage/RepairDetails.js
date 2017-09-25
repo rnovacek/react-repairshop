@@ -5,11 +5,14 @@ import { Divider } from 'semantic-ui-react';
 import CommentsList from './CommentsList';
 import RepairForm from './RepairForm';
 
-const RepairDetails = ({ repair, users, onUpdate, onDelete, onCancel, onAddComment }) => {
+const RepairDetails = ({
+    repair, allRepairs, users, onUpdate, onDelete, onCancel, onAddComment,
+}) => {
     return (
         <div>
             <RepairForm
                 repair={repair}
+                allRepairs={allRepairs}
                 users={users}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
@@ -30,6 +33,7 @@ const RepairDetails = ({ repair, users, onUpdate, onDelete, onCancel, onAddComme
 
 RepairDetails.propTypes = {
     repair: PropTypes.object,
+    allRepairs: PropTypes.array.isRequired,
     users: PropTypes.array.isRequired,
     onUpdate: PropTypes.func,
     onDelete: PropTypes.func,

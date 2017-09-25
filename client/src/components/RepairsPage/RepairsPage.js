@@ -23,7 +23,9 @@ const RepairsPage = ({
             r => (r.assignedTo && r.assignedTo.id === allRepairsQuery.me.id),
         )
         :
-        allRepairsQuery.allRepairs;
+        [...allRepairsQuery.allRepairs];
+
+    repairs.sort((r1, r2) => (Date.parse(r1.scheduledTo) - Date.parse(r2.scheduledTo)));
 
     const onCancel = () => {
         if (allRepairsQuery.me.isAdmin) {
@@ -150,6 +152,7 @@ const RepairsPage = ({
                         () => (
                             <RepairDetails
                                 repair={null}
+                                allRepairs={allRepairsQuery.allRepairs}
                                 users={allRepairsQuery.allUsers}
                                 onUpdate={allRepairsQuery.me.isAdmin ? onUpdate : null}
                                 onCancel={onCancel}
@@ -165,6 +168,7 @@ const RepairsPage = ({
                                 repair={
                                     allRepairsQuery.allRepairs.find(r => r.id === params.repairId)
                                 }
+                                allRepairs={allRepairsQuery.allRepairs}
                                 users={allRepairsQuery.allUsers}
                                 onUpdate={allRepairsQuery.me.isAdmin ? onUpdate : null}
                                 onDelete={allRepairsQuery.me.isAdmin ? onDelete : null}

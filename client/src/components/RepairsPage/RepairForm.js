@@ -1,6 +1,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Divider, Dropdown, Form, Input, Message, Step } from 'semantic-ui-react';
+import moment from 'moment';
+import { DayPickerSingleDateController } from 'react-dates';
+import { addHours, areRangesOverlapping } from 'date-fns';
+
+const TIMES = [[], [], []];
+
+for (let i = 0; i < 24; i += 1) {
+    const text = i < 10 ? `0${i}:00` : `${i}:00`;
+    TIMES[Math.trunc(i / 8)].push({
+        text,
+        value: i,
+    });
+}
+
+const overlappingWithRepair = (date, repairDate) => {
+    return areRangesOverlapping(date, addHours(date, 1), repairDate, addHours(repairDate, 1));
+};
 
 class RepairForm extends React.Component {
     constructor(props) {
@@ -10,21 +27,26 @@ class RepairForm extends React.Component {
             error: null,
             updating: false,
             deleting: false,
+            scheduledToFocused: false,
         };
 
         if (this.props.repair) {
+            const scheduledTo = moment(props.repair.scheduledTo);
             this.state = {
                 ...state,
                 title: props.repair.title,
                 status: props.repair.status,
-                scheduledTo: props.repair.scheduledTo,
+                scheduledTo,
+                time: scheduledTo.format('HH:mm'),
                 assignedTo: props.repair.assignedTo ? props.repair.assignedTo.id : '-',
             };
         } else {
+            const time = moment().add(1, 'hours').minutes(0);
             this.state = {
                 ...state,
                 title: '',
-                scheduledTo: (new Date()).toISOString(),
+                scheduledTo: moment(),
+                time: time.format('HH:mm'),
                 assignedTo: '-',
                 status: 'PENDING',
             };
@@ -41,7 +63,7 @@ class RepairForm extends React.Component {
                 id: this.props.repair ? this.props.repair.id : null,
                 title: this.state.title,
                 status: this.state.status,
-                scheduledTo: this.state.scheduledTo,
+                scheduledTo: this.getSelectedTime().toISOString(),
                 assignedTo: this.state.assignedTo !== '-' ? this.state.assignedTo : null,
             });
         } catch (e) {
@@ -65,6 +87,22 @@ class RepairForm extends React.Component {
                 error: e.toString(),
             });
         }
+    };
+
+    getSelectedTime = () => {
+        const [hours, minutes] = this.state.time.split(':');
+        const time = this.state.scheduledTo.clone();
+        time.hours(hours).minutes(minutes).seconds(0).milliseconds(0);
+        return time;
+    };
+
+    overlappingWithAnyRepair = (id, time) => {
+        const [hours, minutes] = time.split(':');
+        const date = this.state.scheduledTo.clone();
+        date.hours(hours).minutes(minutes).seconds(0).milliseconds(0);
+        return this.props.allRepairs.some(
+            repair => repair.id !== id && overlappingWithRepair(date, repair.scheduledTo),
+        );
     };
 
     render() {
@@ -103,13 +141,66 @@ class RepairForm extends React.Component {
                     onChange={e => this.setState({ title: e.target.value })}
                 />
 
-                <Form.Field
-                    control={Input}
-                    disabled={!this.props.onUpdate}
-                    label="Scheduled to"
-                    value={this.state.scheduledTo}
-                    onChange={e => this.setState({ scheduledTo: e.target.value })}
-                />
+                <Form.Field>
+                    <label>Scheduled to</label>
+                    <div style={{ display: 'flex' }}>
+                        <div style={{ marginRight: '2rem' }}>
+                            <DayPickerSingleDateController
+                                date={this.state.scheduledTo}
+                                onDateChange={date => this.setState({ scheduledTo: date })}
+                                focused={this.state.scheduledToFocused}
+                                onFocusChange={
+                                    ({ focused }) => this.setState({ scheduledToFocused: focused })
+                                }
+                            />
+                        </div>
+
+
+                        <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                            <Form.Field
+                                control={Input}
+                                disabled={!this.props.onUpdate}
+                                value={this.state.time}
+                                onChange={e => this.setState({ time: e.target.value })}
+                            />
+
+                            <div style={{ display: 'flex' }}>
+                                {
+                                    TIMES.map(
+                                        times => (
+                                            <div style={{ flexGrow: 1 }} key={times[0].text}>
+                                                <Button.Group vertical>
+                                                    {
+                                                        times.map(
+                                                            time => (
+                                                                <Button
+                                                                    basic
+                                                                    disabled={this.overlappingWithAnyRepair(this.props.repair ? this.props.repair.id : null, time.text)}
+                                                                    key={time.text}
+                                                                    primary={this.state.time === time.text}
+                                                                    onClick={
+                                                                        () => this.setState({
+                                                                            time: time.text,
+                                                                        })
+                                                                    }
+                                                                >
+                                                                    {time.text}
+                                                                </Button>
+                                                            ),
+                                                        )
+                                                    }
+                                                </Button.Group>
+                                            </div>
+                                        ),
+                                    )
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </Form.Field>
+
+
+
 
                 <Form.Field
                     control={Dropdown}
@@ -180,6 +271,7 @@ RepairForm.propTypes = {
         title: PropTypes.string.isRequired,
         scheduledTo: PropTypes.string.isRequired,
         assignedTo: PropTypes.shape({
+            id: PropTypes.string.isRequired,
             name: PropTypes.string.isRequired,
         }),
         status: PropTypes.string.isRequired,

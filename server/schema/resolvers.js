@@ -1,8 +1,10 @@
 
+
 const { ObjectId } = require('mongodb');
 const { GraphQLScalarType } = require('graphql');
 const { Kind } = require('graphql/language');
 const authentication = require('../authentication');
+const addHours = require('date-fns/add_hours');
 
 const checkUser = (user, res) => {
     if (!user) {
@@ -16,6 +18,25 @@ const checkAdmin = (user, res) => {
     if (!user.isAdmin) {
         res.statusCode = 403;
         throw new Error('error-not-admin');
+    }
+};
+
+const checkRepairCollision = async (repair, Repairs) => {
+    const oid = repair.id ? new ObjectId(repair.id) : null;
+
+    console.log('Looking for collision', oid, repair.scheduledTo, addHours(repair.scheduledTo, 1));
+    const colliding = await Repairs.find({
+        _id: {
+            $ne: oid,
+        },
+        scheduledTo: {
+            $gte: repair.scheduledTo,
+            $lt: addHours(repair.scheduledTo, 1),
+        },
+    }).count();
+
+    if (colliding > 0) {
+        throw new Error('Repair is colliding with another repair');
     }
 };
 
@@ -46,6 +67,8 @@ module.exports = {
                 throw new Error('Repair needs to be scheduled');
             }
 
+            await checkRepairCollision(input, ctx.mongo.Repairs);
+
             const response = await ctx.mongo.Repairs.insertOne(input);
             const oid = response.insertedId;
             return {
@@ -62,9 +85,11 @@ module.exports = {
             if (!input.scheduledTo) {
                 throw new Error('Repair needs to be scheduled');
             }
-
             const { id, assignedTo, ...data } = input;
             const oid = new ObjectId(id);
+
+            await checkRepairCollision(input, ctx.mongo.Repairs);
+
             await ctx.mongo.Repairs.updateOne(
                 { _id: oid },
                 {

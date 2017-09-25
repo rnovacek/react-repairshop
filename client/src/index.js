@@ -4,6 +4,7 @@ import { ApolloProvider, createNetworkInterface, ApolloClient } from 'react-apol
 import { Router } from 'react-router-dom';
 import createHistory from 'history/createBrowserHistory';
 import 'semantic-ui-css/semantic.min.css';
+import 'react-dates/lib/css/_datepicker.css';
 
 import './site.css';
 import registerServiceWorker from './registerServiceWorker';
