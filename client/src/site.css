@@ -1,0 +1,46 @@
+
+.DateRangePickerInput {
+    border: 1px solid rgba(34,36,38,.15);
+    border-radius: .28571429rem;
+}
+
+.DateInput {
+    border-radius: .28571429rem;
+    font-size: 1em;
+    padding: 0 1em;
+    width: auto;
+}
+
+.time-select {
+    height: 100%;
+    padding: 0 1em;
+    display: flex;
+    border: 1px solid rgba(34,36,38,.15);
+    border-radius: .28571429rem;
+}
+
+.time-select input {
+    border: none;
+    width: 5em;
+    height: 100%;
+    border-radius: .28571429rem;
+}
+
+.time-select input.focused {
+    background: #99ede6;
+    border-color: #99ede6;
+}
+
+.time-select .time-arrow {
+    padding: 0 1em;
+    display: inline-block;
+    vertical-align: middle;
+    height: 100%;
+}
+
+.time-select .time-arrow svg {
+    vertical-align: middle;
+    fill: #484848;
+    height: 24px;
+    width: 24px;
+}

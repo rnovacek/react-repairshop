@@ -25,8 +25,6 @@ const RepairsPage = ({
         :
         [...allRepairsQuery.allRepairs];
 
-    repairs.sort((r1, r2) => (Date.parse(r1.scheduledTo) - Date.parse(r2.scheduledTo)));
-
     const onCancel = () => {
         if (allRepairsQuery.me.isAdmin) {
             history.push('/repairs');
