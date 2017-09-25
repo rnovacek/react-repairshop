@@ -20,7 +20,7 @@ const App = ({ location, history, meQuery }) => {
         history.push(`/login?next=${location.pathname}`);
     };
 
-    const onLogin = (token) => {
+    const onLogin = async (token) => {
         localStorage.token = token;
 
         const params = new URLSearchParams(location.search);
@@ -28,7 +28,7 @@ const App = ({ location, history, meQuery }) => {
         if (next === '/login') {
             next = '/';
         }
-        meQuery.refetch();
+        await meQuery.refetch();
         history.push(next);
     };
 
