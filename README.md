@@ -1,6 +1,5 @@
-Hi everyone,
+DISCLAIMER: this is a toy application that I wrote to familiarize myself with React, NodeJS and GraphQL. It's not meant to be used in production!
 
-The Toptal Academy React project is below. Please read the expectations thoroughly, and be sure to make commits regularly as you build your solution.
 
 Task: Write an application that helps run a small auto repair shop.
 
@@ -37,15 +36,3 @@ API Specifications
 - All actions need to be done client side using AJAX. Refreshing the page to display completed actions is not acceptable.
 - A bonus will be given for unit and e2e tests.
 - You will not be marked on design skills. However, do try to keep the interface as tidy as possible.
-
-You may use Firebase or similar services for the back-end. However, if you opt for this method, you should be able to explain how a REST API works and demonstrate this by creating functional tests that use the REST layer directly. Remember using the eslint configurations from AirBnb's team.
-
-Deadline: Monday, September 26th at 8:00AM EST.
-
-Submission instructions:
-
-Make sure to show your progress with frequent commits. A single commit near the end of the deadline with the entire solution sent at once will not be accepted.
-
-Make sure that you treat this project seriously and deliver a solution that is production quality. Your solution should be something that you feel comfortable presenting to the client as a finished product.
-
-Approaching the end of the project, we will provide instructions for submission.
